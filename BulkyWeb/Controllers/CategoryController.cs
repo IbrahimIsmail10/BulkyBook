@@ -1,21 +1,27 @@
 ﻿using Bulky.DataAccess.Data;
+using Bulky.DataAccess.Repository.IRepository;
+
 using Microsoft.AspNetCore.Mvc;
 using Bulky.Models;
+using Microsoft.EntityFrameworkCore.Migrations;
+using Bulky.DataAccess.Repository;
 
 namespace BulkyWeb.Controllers
 {
     public class CategoryController : Controller
     {
         private readonly ApplicationDbContext _db;
+        private readonly ICategoryRepository _repository;
 
-        public CategoryController(ApplicationDbContext db) { 
+        public CategoryController(ApplicationDbContext db,ICategoryRepository repository) { 
             _db = db;
+            _repository = repository;
         }
 
 
         public IActionResult Index()
         {
-            List<Category> categoryList = _db.Categories.ToList();
+            List<Category> categoryList = _repository.GetAll();
             return View(categoryList);
         }
 
@@ -41,7 +47,7 @@ namespace BulkyWeb.Controllers
             {
                 return NotFound();
             }
-            var obj = _db.Categories.FirstOrDefault(u=>u.Id == id);
+            var obj = _repository.Get(u => u.Id == id);
             if (obj == null)
             {
                 return NotFound();
@@ -54,8 +60,7 @@ namespace BulkyWeb.Controllers
         {
             if (ModelState.IsValid)
             {
-                _db.Categories.Update(obj);
-                _db.SaveChanges();
+                _repository.Update(obj);
                 return RedirectToAction("Index");
             }
             return View();
@@ -67,7 +72,7 @@ namespace BulkyWeb.Controllers
             {
                 return NotFound();
             }
-            var obj = _db.Categories.FirstOrDefault(u => u.Id == id);
+            var obj = _repository.Get(u => u.Id == id);
             if (obj == null)
             {
                 return NotFound();
@@ -78,13 +83,12 @@ namespace BulkyWeb.Controllers
         [HttpPost ,ActionName("Delete")]
         public IActionResult DeletePost(int? id)
         {
-            var obj = _db.Categories.FirstOrDefault(u => u.Id == id);
+            var obj = _repository.Get(u => u.Id == id);
             if (obj == null)
             {
                 return NotFound();
             }
-            _db.Categories.Remove(obj);
-            _db.SaveChanges();  
+            _repository.Remove(obj);
 
             return RedirectToAction("Index");
         }
