@@ -1,19 +1,18 @@
 ﻿using Bulky.DataAccess.Data;
 using Bulky.DataAccess.Repository.IRepository;
-
-using Microsoft.AspNetCore.Mvc;
 using Bulky.Models;
-using Microsoft.EntityFrameworkCore.Migrations;
-using Bulky.DataAccess.Repository;
+using Microsoft.AspNetCore.Mvc;
 
-namespace BulkyWeb.Controllers
+namespace BulkyWeb.Areas.Admin.Controllers
 {
-    public class CategoryController : Controller
+    [Area("Admin")]
+    public class ProductController : Controller
     {
         private readonly ApplicationDbContext _db;
-        private readonly ICategoryRepository _repository;
+        private readonly IUnitOfWork _repository;
 
-        public CategoryController(ApplicationDbContext db,ICategoryRepository repository) { 
+        public ProductController(ApplicationDbContext db, IUnitOfWork repository)
+        {
             _db = db;
             _repository = repository;
         }
@@ -21,21 +20,20 @@ namespace BulkyWeb.Controllers
 
         public IActionResult Index()
         {
-            List<Category> categoryList = _repository.GetAll();
-            return View(categoryList);
+            List<Product> productslist = _repository.Product.GetAll();
+            return View(productslist);
         }
 
         public IActionResult Create()
         {
-            return View(new Category());
+            return View(new Product());
         }
         [HttpPost]
-        public IActionResult Create(Category obj)
+        public IActionResult Create(Product obj)
         {
             if (ModelState.IsValid)
             {
-                _db.Categories.Add(obj);
-                _db.SaveChanges();
+               _repository.Product.Add(obj);
                 return RedirectToAction("Index");
             }
             return View();
@@ -47,7 +45,7 @@ namespace BulkyWeb.Controllers
             {
                 return NotFound();
             }
-            var obj = _repository.Get(u => u.Id == id);
+            var obj = _repository.Product.Get(u => u.Id == id);
             if (obj == null)
             {
                 return NotFound();
@@ -56,11 +54,11 @@ namespace BulkyWeb.Controllers
             return View(obj);
         }
         [HttpPost]
-        public IActionResult Edit(Category obj)
+        public IActionResult Edit(Product obj)
         {
             if (ModelState.IsValid)
             {
-                _repository.Update(obj);
+                _repository.Product.Update(obj);
                 return RedirectToAction("Index");
             }
             return View();
@@ -72,7 +70,7 @@ namespace BulkyWeb.Controllers
             {
                 return NotFound();
             }
-            var obj = _repository.Get(u => u.Id == id);
+            var obj = _repository.Product.Get(u => u.Id == id);
             if (obj == null)
             {
                 return NotFound();
@@ -80,19 +78,18 @@ namespace BulkyWeb.Controllers
 
             return View(obj);
         }
-        [HttpPost ,ActionName("Delete")]
+        [HttpPost, ActionName("Delete")]
         public IActionResult DeletePost(int? id)
         {
-            var obj = _repository.Get(u => u.Id == id);
+            var obj = _repository.Product.Get(u => u.Id == id);
             if (obj == null)
             {
                 return NotFound();
             }
-            _repository.Remove(obj);
+            _repository.Product.Remove(obj);
 
             return RedirectToAction("Index");
         }
-
 
     }
 }

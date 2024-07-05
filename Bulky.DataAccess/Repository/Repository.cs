@@ -72,7 +72,8 @@ namespace Bulky.DataAccess.Repository
         }
         public void RemoveRange(IEnumerable<T> entity)
         {
-            throw new NotImplementedException();
+            dbset.RemoveRange(entity);
+            Save();
         }
         public void Save()
         {
